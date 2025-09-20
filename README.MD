@@ -1,9 +1,11 @@
 # Toylib
 
-![C++11](https://img.shields.io/badge/C%2B%2B-11-blue?logo=c%2B%2B)
-![MIT License](https://img.shields.io/badge/License-MIT-green)
+![C++11](https://img.shields.io/badge/C%2B%2B-11-blue.svg)
+[![MIT License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 Some simple toy header-only libraries for C++. All classes are header-only and only depend on C++ standard library.
+
+This project is mainly for learning purposes, but it may also be useful in small-scale projects.
 
 Requires at least C++11.
 
@@ -17,12 +19,15 @@ Simply copy them to your include folder and include them in your project. All he
 - [FixedMemPool](#fixedmempool)
 - [RingBuffer](#ringbuffer)
 - [BlockingQueue](#blockingqueue)
+- FlatMap planned
+- FlatSet planned
+- SkipList planned
 
 ### IntrusiveNodeList
 
 A simple STL-like intrusive linked list header. Not thread-safe.
 
-Intrusive linked list can be used like normal linked list, but the nodes are embedded in the objects. **Users are responsible for managing the memory of the objects, and deallocate object's memory while it is still in the list will cause undefined behavior**. This can save memory allocations and improve performance in some scenarios.
+Intrusive linked list can be used like normal linked list, but the nodes are embedded in the objects. **Users are responsible for managing the memory of the objects, and deallocate object's memory while it is still in the list will cause undefined behavior**. This can save memory allocations and improve performance in some scenarios. Users can also put one node in multiple lists by defining multiple `intrusive_node` members in the object.
 
 Interfaces of `intrusive_list<T, NodeMember>`:
 
@@ -68,14 +73,14 @@ int main() {
 
 ### FixedMemPool
 
-Header file of a simple memory pool. It supports fixed-size memory blocks and thread-safe allocation and deallocation.
+Header file of a simple memory pool. It supports fixed-size memory blocks and thread-safe allocation and deallocation. Contiguous memory chunks are allocated to improve cache performance and reduce frequent allocation overhead.
 
 Interfaces of `fixed_mem_pool<item_size, chunk_size>`:
 
 - `void alloc_new_chunk()`: Manually allocate a new chunk of memory.
 - `char* alloc(bool alloc_when_exhausted = true)`: Allocate a memory block. `alloc_when_exhausted` specifies whether to allocate a new chunk when there is no free block. If set to false, it will return nullptr when exhausted.
 - `template <typename T> T* alloc_as()`: Allocate a memory block and cast it to T*.
-- `void free(void* ptr)`: Free a memory block.
+- `void free(void* ptr)`: Return a memory block to the pool.
 
 Usage example:
 
@@ -176,7 +181,7 @@ int main() {
 
 ## Tests
 
-Each header has its own test file. You can compile them and run tests for each header.
+Each header has its own test file(some of them need to be implemented though). You can compile them and run tests for each header.
 
 To execute tests:
 
