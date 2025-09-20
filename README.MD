@@ -13,6 +13,11 @@ Simply copy them to your include folder and include them in your project. All he
 
 ## Libraries
 
+- [IntrusiveNodeList](#intrusivenodelist)
+- [FixedMemPool](#fixedmempool)
+- [RingBuffer](#ringbuffer)
+- [BlockingQueue](#blockingqueue)
+
 ### IntrusiveNodeList
 
 A simple STL-like intrusive linked list header. Not thread-safe.
