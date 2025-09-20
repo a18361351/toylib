@@ -6,7 +6,22 @@
 
 #define TOYTEST_ASSERT(expr, fail_msg) \
     if (!(expr)) { \
+        std::cerr << "In " << __FILE__ << ":" << __LINE__ << ", "; \
         std::cerr << "Assertion failed: " << fail_msg << std::endl; \
+        return false; \
+    }
+
+#define TOYTEST_ASSERT_EQ(expr1, expr2, fail_msg) \
+    if (!((expr1) == (expr2))) { \
+        std::cerr << "In " << __FILE__ << ":" << __LINE__ << ", "; \
+        std::cerr << "Assertion failed: " << fail_msg << " (" << (expr1) << " == " << (expr2) << ") failed" << std::endl; \
+        return false; \
+    }
+
+#define TOYTEST_ASSERT_NE(expr1, expr2, fail_msg) \
+    if (!((expr1) != (expr2))) { \
+        std::cerr << "In " << __FILE__ << ":" << __LINE__ << ", "; \
+        std::cerr << "Assertion failed: " << fail_msg << " (" << (expr1) << " != " << (expr2) << ") failed" << std::endl; \
         return false; \
     }
 
@@ -18,6 +33,7 @@
             __caught = true; \
         } \
         if (!__caught) { \
+            std::cerr << "In " << __FILE__ << ":" << __LINE__ << ", "; \
             std::cerr << "Exception not thrown: " << fail_msg << std::endl; \
             return false; \
         } \
@@ -31,6 +47,7 @@
             __caught = true; \
         } \
         if (__caught) { \
+            std::cerr << "In " << __FILE__ << ":" << __LINE__ << ", "; \
             std::cerr << "Exception thrown: " << fail_msg << std::endl; \
             return false; \
         } \
