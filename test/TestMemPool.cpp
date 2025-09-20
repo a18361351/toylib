@@ -1,70 +1,22 @@
 #include "../include/FixedMemPool.hpp"
+#include "../include/ToyTest.hpp"
 #include <iostream>
 #include <thread>
 #include <atomic>
-#include <vector>
-#include <chrono>
-
-#define TOYTEST_ASSERT(expr, fail_msg) \
-    if (!(expr)) { \
-        std::cerr << "Assertion failed: " << fail_msg << std::endl; \
-        return false; \
-    }
-
-#define TOYTEST_THROW(expr, fail_msg) { \
-        bool __caught = false; \
-        try { \
-            expr; \
-        } catch (...) { \
-            __caught = true; \
-        } \
-        if (!__caught) { \
-            std::cerr << "Exception not thrown: " << fail_msg << std::endl; \
-            return false; \
-        } \
-    }
-
-#define TOYTEST_NOTHROW(expr, fail_msg) { \
-        bool __caught = false; \
-        try { \
-            expr; \
-        } catch (...) { \
-            __caught = true; \
-        } \
-        if (__caught) { \
-            std::cerr << "Exception thrown: " << fail_msg << std::endl; \
-            return false; \
-        } \
-    }
-
-#define RUN_TEST(name, fn, passed, failed) \
-    std::cout << "Test for " << name << std::endl; \
-    if (fn()) { \
-        std::cout << "[PASSED] " << name << std::endl; \
-        passed.push_back(name); \
-    } else { \
-        std::cout << "[FAILED] " << name << std::endl; \
-        failed.push_back(name); \
-    }
-
-#define RUN_TEST_TIMER(name, fn, passed, failed) \
-    std::cout << "Test for " << name << std::endl; \
-    { \
-        auto start = std::chrono::high_resolution_clock::now(); \
-        if (fn()) { \
-            auto end = std::chrono::high_resolution_clock::now(); \
-            std::cout << "[PASSED] " << name << std::endl; \
-            passed.push_back(name); \
-            std::cout << "Time taken:" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl; \
-        } else { \
-            auto end = std::chrono::high_resolution_clock::now(); \
-            std::cout << "[FAILED] " << name << std::endl; \
-            failed.push_back(name); \
-            std::cout << "Time taken:" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl; \
-        } \
-    }
 
 using toylib::fixed_mem_pool;
+
+bool TestMemPool_SimpleTest() {
+    fixed_mem_pool<8, 32> pool(1);
+
+    auto obj = pool.alloc_as<uint64_t>();
+    (*obj) = 0x1234;
+
+    TOYTEST_ASSERT(*obj == 0x1234, "obj value mismatch");
+
+    pool.free(obj);
+    return true;
+}
 
 bool TestMemPool_SanityTest() {
     fixed_mem_pool<8, 32> pool(1);
@@ -285,6 +237,7 @@ bool TestMemPool_ExpandPressureTest() {
 
 int main() {
     std::vector<std::string> passed, failed;
+    RUN_TEST("MemPool_SimpleTest", TestMemPool_SimpleTest, passed, failed);
     RUN_TEST("MemPool_SanityTest", TestMemPool_SanityTest, passed, failed);
     RUN_TEST("MemPool_AllocTest", TestMemPool_AllocTest, passed, failed);
     RUN_TEST("MemPool_NonfixedTest", TestMemPool_NonfixedTest, passed, failed);

@@ -9,11 +9,6 @@
 #include <iterator>
 
 namespace toylib {
-    
-// 该宏的作用是，通过某个类的成员指针，获取该类对象本体的指针
-// offsetof来自cstddef，作用是获取某个成员在类中的偏移量
-#define CONTAINER_OF(ptr, type, member) \
-    (reinterpret_cast<type*>((char*)(ptr) - offsetof(type, member)))
 
 // 侵入式链表节点对象
 // 侵入式链表与传统链表的区别在于：侵入式链表将链表节点对象嵌入用户定义的数据对象中，
@@ -49,7 +44,7 @@ private:
     }
 
     static T* GetObject(intrusive_node* node) {
-        return CONTAINER_OF(node, T, NodeMember);
+        return reinterpret_cast<T*>(reinterpret_cast<char*>(node) - reinterpret_cast<std::ptrdiff_t>(&(reinterpret_cast<T*>(0)->*NodeMember)));
     }
 
 public:
@@ -325,19 +320,46 @@ public:
         for (auto it = begin(); it != end(); ) {
             it = erase(it);
         }
+        size_ = 0;
     }
     void swap(intrusive_list& rhs) noexcept {
-        auto rhs_next = rhs.dummy_node.next_;
-        auto rhs_prev = rhs.dummy_node.prev_;
-        auto this_next = dummy_node.next_;
+        // swap dummy node's link
         auto this_prev = dummy_node.prev_;
-        std::swap(rhs.dummy_node, dummy_node);
+        auto this_next = dummy_node.next_;
+        auto rhs_prev = rhs.dummy_node.prev_;
+        auto rhs_next = rhs.dummy_node.next_;
+        // both empty
+        if (this_prev == &dummy_node && rhs_prev == &rhs.dummy_node) {
+            return;
+        }
+        // this empty
+        if (this_prev == &dummy_node) {
+            dummy_node.relink(rhs_prev, rhs_next);
+            rhs_prev->next_ = &dummy_node;
+            rhs_next->prev_ = &dummy_node;
+            rhs.dummy_node.relink(&rhs.dummy_node, &rhs.dummy_node);
+            size_ = rhs.size_;
+            rhs.size_ = 0;
+            return;
+        }
+        // rhs empty
+        if (rhs_prev == &rhs.dummy_node) {
+            rhs.dummy_node.relink(this_prev, this_next);
+            this_prev->next_ = &rhs.dummy_node;
+            this_next->prev_ = &rhs.dummy_node;
+            dummy_node.relink(&dummy_node, &dummy_node);
+            rhs.size_ = size_;
+            size_ = 0;
+            return;
+        }
+        // else
+        dummy_node.relink(rhs_prev, rhs_next);
+        rhs.dummy_node.relink(this_prev, this_next);
         std::swap(size_, rhs.size_);
-
-        rhs_next->prev_ = &rhs.dummy_node;
-        rhs_prev->next_ = &rhs.dummy_node;
-        this_next->prev_ = &dummy_node;
-        this_prev->next_ = &dummy_node;
+        rhs_prev->next_ = &dummy_node;
+        rhs_next->prev_ = &dummy_node;
+        this_prev->next_ = &rhs.dummy_node;
+        this_next->prev_ = &rhs.dummy_node;
     }
 
 
