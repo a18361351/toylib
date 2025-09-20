@@ -6,7 +6,7 @@ Requires at least C++11.
 
 ## How-to-use
 
-Simply copy them to your include folder and include them in your project. All header files doesn't rely on other files in this repo.
+Simply copy them to your include folder and include them in your project. All header files doesn't rely on other headers in this repo.
 
 ## Libraries
 
@@ -60,6 +60,7 @@ Interfaces of `ring_buffer_spsc<T>`:
 
 - `bool pop(T& out)`: Pop an item from buffer, return true and set `out` if successful, return false if buffer is empty.
 - `template <typename U> bool push(U&& item)`: Push an item to buffer, return true if successful, return false if buffer is full.
+- `template <typename... Args> bool emplace(Args&&... args)`: Emplace an item in buffer, return true if successful, return false if buffer is full.
 - `bool empty()`: Check if buffer is empty.
 - `bool full()`: Check if buffer is full.
 - `size_t size()`: Get number of items in buffer.
@@ -72,7 +73,24 @@ Usage example:
 
 ### BlockingQueue
 
-to be completed
+A thread-safe task queue with blocking command support. Though it's not as fast as lock-free queues as it used mutex to protect queue, it's more flexible and easier to use.
+
+Interfaces of `blocking_queue<T>`:
+
+- `template <typename U> void push(U&& item)`: Push an item to the queue.
+- `template <typename... Args> void emplace(Args&&... args)`: Emplace an item in the queue.
+- `T pop()`: Pop an item from the queue, block if the queue is empty. May throw if queue is shutdown.
+- `bool pop(T& out)`: Pop an item from the queue, return true and set `out` if successful, return false if the queue is shutdown.
+- `bool try_pop(T& out)`: Try to pop an item from the queue, return true and set `out` if successful, return false if the queue is empty.
+- `template <typename It> size_t bulk_try_pop(size_t max_attempt, It inserter)`: Try to pop up to `max_attempt` items from the queue, insert them using the `inserter` iterator. Return number of items popped.
+- `template <typename It> void bulk_push(It begin, It end)`: Push items in the range [begin, end) to the queue.
+- `void shutdown()`: Shutdown the queue, blocking functions will either throw an runtime_error or return false.
+
+Usage example:
+
+```C++
+
+```
 
 ## Tests
 

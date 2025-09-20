@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <mutex>
+#include <cassert>
 
 namespace toylib {
 
@@ -28,7 +29,7 @@ struct chunk {
 template <size_t item_size, size_t chunk_size = 4096>
 class fixed_mem_pool {
 private:
-    static_assert(item_size >= sizeof(mem_node*), "item_size must be greater than a pointer's size");
+    static_assert(item_size >= sizeof(mem_node*), "item_size must be greater than a pointer's size"); // NOLINT
     static_assert(item_size <= chunk_size, "item_size must be less than or equal to chunk_size");
     std::mutex chunk_latch_;    // protects chunks
     std::vector<std::unique_ptr<char[]>> chunks_;
@@ -52,7 +53,7 @@ private:
         }
 
         // latch for chunks_
-        std::unique_lock cl(chunk_latch_);
+        std::unique_lock<std::mutex> cl(chunk_latch_);
         chunks_.push_back(std::move(new_chunk));
         cl.unlock();
 
@@ -61,7 +62,7 @@ private:
 
     bool debug_check_free_align(void* ptr) {
         std::vector<char*> snapshot;
-        std::unique_lock cl(chunk_latch_);
+        std::unique_lock<std::mutex> cl(chunk_latch_);
         snapshot.reserve(chunks_.size());
         for (const auto& c : chunks_) {
             snapshot.push_back(c.get());
@@ -122,7 +123,7 @@ public:
         auto new_tail = alloc_chunk_impl();
         
         // modify tail node
-        std::unique_lock nl(node_latch_);
+        std::unique_lock<std::mutex> nl(node_latch_);
         if (head_) {
             // 我们可以将新chunk的尾部节点和旧head连接起来
             new_tail->next_ = head_;
@@ -133,7 +134,7 @@ public:
 
     // @param alloc_when_exhausted Whether to allocate new chunks if there is no free node. If set to false, function will return nullptr when exhausted.
     char* alloc(bool alloc_when_exhausted = true) {
-        std::unique_lock nl(node_latch_);
+        std::unique_lock<std::mutex> nl(node_latch_);
         if (!head_) {
             if (alloc_when_exhausted) {
                 alloc_chunk_impl();
@@ -163,7 +164,7 @@ public:
 
         auto node = reinterpret_cast<mem_node*>(ptr);
 
-        std::unique_lock nl(node_latch_);
+        std::unique_lock<std::mutex> nl(node_latch_);
 
         node->next_ = head_;
         head_ = node;

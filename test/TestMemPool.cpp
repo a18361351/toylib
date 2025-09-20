@@ -11,7 +11,7 @@
         return false; \
     }
 
-#define TOYTEST_EXCEPTION(expr, fail_msg) { \
+#define TOYTEST_THROW(expr, fail_msg) { \
         bool __caught = false; \
         try { \
             expr; \
@@ -20,6 +20,19 @@
         } \
         if (!__caught) { \
             std::cerr << "Exception not thrown: " << fail_msg << std::endl; \
+            return false; \
+        } \
+    }
+
+#define TOYTEST_NOTHROW(expr, fail_msg) { \
+        bool __caught = false; \
+        try { \
+            expr; \
+        } catch (...) { \
+            __caught = true; \
+        } \
+        if (__caught) { \
+            std::cerr << "Exception thrown: " << fail_msg << std::endl; \
             return false; \
         } \
     }
@@ -160,7 +173,7 @@ bool TestMemPool_ConcurrentTest() {
     int writer = 16;    // 4096 / 8 / 16 == 32
     int round_max = 1000;
     int item_hold = 32;
-    std::atomic_bool start = false;
+    std::atomic_bool start{false};
     auto write_fn = [=, &pool, &start](int tid) -> bool {
         bool good = true;
         while (!start);
@@ -214,8 +227,8 @@ bool TestMemPool_ExpandPressureTest() {
     fixed_mem_pool<8, 32> pool(1);
     int writer = 16;
     int item_hold = 64; // 4096 / 4 / 16 = 64
-    std::atomic_bool start = false;
-    std::atomic_int done = writer;
+    std::atomic_bool start{false};
+    std::atomic_int done{writer};
     auto write_fn = [=, &pool, &start, &done](int tid) -> bool {
         bool good = true;
         while (!start);
