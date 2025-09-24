@@ -27,7 +27,9 @@ Simply copy them to your include folder and include them in your project. All he
 
 A simple STL-like intrusive linked list header. Not thread-safe.
 
-Intrusive linked list can be used like normal linked list, but the nodes are embedded in the objects. **Users are responsible for managing the memory of the objects, and deallocate object's memory while it is still in the list will cause undefined behavior**. This can save memory allocations and improve performance in some scenarios. Users can also put one node in multiple lists by defining multiple `intrusive_node` members in the object.
+Intrusive linked list can be used like normal linked list, but the nodes are embedded in the objects. **Users are responsible for managing the memory of the objects, and deallocate object's memory while it is still in the list will cause undefined behavior**.
+
+Intrusive linked list can save memory allocations and improve performance in some scenarios. Users can also put one node in multiple lists by defining multiple `intrusive_node` members in the object.
 
 Interfaces of `intrusive_list<T, NodeMember>`:
 
@@ -175,6 +177,42 @@ int main() {
     });
     producer.join();
     consumer.join();
+    return 0;
+}
+```
+
+### FlatSet
+
+Flat set container, like `std::set` but using sorted array as backend. Elements are sorted in ascending order by default. This is suitable for scenarios where insertion and deletion are rare but lookup and iteration are frequent.
+
+Interfaces of `flat_set<Key, Compare>`:
+
+- `size_t count(const Key& key)`: Count the number of elements with the given key (0 or 1 since it's a set).
+- `std::pair<iterator, bool> insert(const Key& key)`: Insert an element, return a pair of iterator to the element and a bool indicating whether the insertion took place.
+- `iterator insert(const_iterator hint, const Key& val)`: Insert an element with a hint, return an iterator to the inserted or existing element.
+- `template <typename InputIt> void insert(InputIt first, InputIt last)`: Insert a range of elements.
+- `size_t erase(const Key& key)`: Erase elements with the given key, return the number of elements erased (0 or 1).
+- `iterator erase(iterator pos)`: Erase the element at the position, return the next iterator after the erased one.
+- `iterator erase(iterator first, iterator last)`: Erase elements in the range [first, last), return the next iterator after the last erased one.
+- `iterator find(const Key& key)`: Find an element, return the element's iterator or end() if not found.
+- `iterator begin()/end()`: Get the begin/end iterator.
+- `bool empty()`: Check if the set is empty.
+- `size_t size()`: Get the size of the set.
+- `void clear()`: Clear the set.
+- `void reserve(size_t n)`: Reserve space for n elements.
+
+Usage example:
+
+```C++
+#include <iostream>
+#include "FlatSet.hpp"
+using namespace toylib;
+int main() {
+    flat_set<int> fs;
+    fs.insert(1);
+    std::cout << fs.count(1) << std::endl;
+    fs.erase(1);
+    std::cout << fs.count(1) << std::endl;
     return 0;
 }
 ```
