@@ -90,6 +90,9 @@ public:
     iterator insert(const_iterator hint, const Key& val) {
         // check whether this position(hint) matches:
         //  prev < val < hint
+        if (data_.empty()) {
+            return data_.insert(data_.begin(), val);
+        }
         if (hint == cbegin()) {
             if ((comp_(val, *hint))) {
                 data_.insert(data_.begin(), val);

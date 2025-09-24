@@ -85,6 +85,70 @@ bool TestFlatSet_SanityTest() {
     return true;
 }
 
+bool TestFlatSet_HintInsertTest() {
+    flat_set<int> fs;
+    flat_set<int> fs2;
+    std::vector<int> inserted;
+    const int limit = 100000;
+    for (int i = 0; i < limit; i++) {
+        inserted.push_back(i);
+    }
+
+    int insert1_ms, insert2_ms;
+    // front insert test
+    std::chrono::high_resolution_clock::time_point start, end;
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = limit - 1; i >= 0; i--) {
+        fs.insert(i);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    insert1_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = limit - 1; i >= 0; i--) {
+        fs2.insert(fs2.begin(), i);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    insert2_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    
+    // insert with hint should not affect correctness
+    for (int i = 0; i < limit; i++) {
+        TOYTEST_ASSERT(fs.count(i) == 1, "insert failed");
+        TOYTEST_ASSERT(fs2.count(i) == 1, "insert with hint not correct");
+    }
+    
+    // With hint version should be faster than without hint version
+    std::cout << "Front insert: with hint: " << insert2_ms << " ms, without hint: " << insert1_ms << " ms" << std::endl;
+
+    fs.clear();
+    fs2.clear();
+    // tail insert test
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < limit; i++) {
+        fs.insert(i);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    insert1_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < limit; i++) {
+        fs2.insert(fs2.end(), i);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    insert2_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    
+    // insert with hint should not affect correctness
+    for (int i = 0; i < limit; i++) {
+        TOYTEST_ASSERT(fs.count(i) == 1, "insert failed");
+        TOYTEST_ASSERT(fs2.count(i) == 1, "insert with hint not correct");
+    }
+    
+    // With hint version should be faster than without hint version
+    std::cout << "Back insert: with hint: " << insert2_ms << " ms, without hint: " << insert1_ms << " ms" << std::endl;
+
+    return true;
+}
+
 bool TestFlatSet_Benchmark() {
     flat_set<int> fs;
     std::set<int> s;
@@ -173,6 +237,7 @@ int main() {
     std::vector<std::string> passed, failed;
     RUN_TEST("FlatSet Simple Test", TestFlatSet_SimpleTest, passed, failed);
     RUN_TEST("FlatSet Sanity Test", TestFlatSet_SanityTest, passed, failed);
+    RUN_TEST("FlatSet Hint Insert Test", TestFlatSet_HintInsertTest, passed, failed);
     RUN_TEST_TIMER("FlatSet Benchmark Test", TestFlatSet_Benchmark, passed, failed);
 
     if (failed.empty()) {
