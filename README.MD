@@ -19,8 +19,8 @@ Simply copy them to your include folder and include them in your project. All he
 - [FixedMemPool](#fixedmempool)
 - [RingBuffer](#ringbuffer)
 - [BlockingQueue](#blockingqueue)
-- FlatMap planned
-- FlatSet planned
+- [FlatSet](#flatset)
+- [FlatMap](#flatmap)
 - SkipList planned
 
 ### IntrusiveNodeList
@@ -213,6 +213,33 @@ int main() {
     std::cout << fs.count(1) << std::endl;
     fs.erase(1);
     std::cout << fs.count(1) << std::endl;
+    return 0;
+}
+```
+
+### FlatMap
+
+Like `std::map` but using sorted array as backend. Keys are sorted in ascending order by default. Implementation is similar to `flat_set`.
+
+Interfaces of `flat_map<Key, Value, Compare>`:
+
+Examples:
+
+```C++
+#include "../include/FlatMap.hpp"
+#include "../include/ToyTest.hpp"
+#include <iostream>
+using namespace toylib;
+
+int main() {
+    flat_map<int, std::string> fm;
+    fm[0] = "Hello toylib";
+    fm[1] = "Simple library";
+    std::cout << fm.at(0) << std::endl;
+    std::cout << fm[1] << std::endl;
+    
+    fm.erase(0);
+    std::cout << fm.count(0);
     return 0;
 }
 ```
