@@ -48,8 +48,18 @@ private:
     }
     Compare comp_;
 public:
+    // constructors/destructor
     flat_set() = default;
+    explicit flat_set(const Compare& comp) : data_(), comp_(comp) {}
     ~flat_set() = default;
+
+    // copy ops
+    flat_set(const flat_set& other) = default;
+    flat_set& operator=(const flat_set& other) = default;
+
+    // move ops
+    flat_set(flat_set&& other) noexcept = default;
+    flat_set& operator=(flat_set&& other) noexcept = default;
 
     // @brief count the number of elements matching key
     // @param key key to lookup

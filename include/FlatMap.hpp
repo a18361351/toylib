@@ -57,8 +57,18 @@ private:
     }
     Compare comp_;
 public:
+    // constructors/destructor
     flat_map() = default;
+    explicit flat_map(const Compare& comp) : data_(), comp_(comp) {}
     ~flat_map() = default;
+
+    // copy ops
+    flat_map(const flat_map& other) = default;
+    flat_map& operator=(const flat_map& other) = default;
+
+    // move ops
+    flat_map(flat_map&& other) noexcept = default;
+    flat_map& operator=(flat_map&& other) noexcept = default;
 
     // @brief count the number of elements matching key
     // @param key key to lookup
