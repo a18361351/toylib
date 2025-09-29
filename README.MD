@@ -21,7 +21,7 @@ Simply copy them to your include folder and include them in your project. All he
 - [BlockingQueue](#blockingqueue)
 - [FlatSet](#flatset)
 - [FlatMap](#flatmap)
-- SkipList planned
+- [SkipList](#skiplist)
 
 ### IntrusiveNodeList
 
@@ -242,6 +242,20 @@ int main() {
     std::cout << fm.count(0);
     return 0;
 }
+```
+
+### SkipList
+
+Skiplist is a probablistic data structure that allows fast lookup, insertion and deletion operations. Lookup/Insert/Delete an element's complexity is O(log n) on average.
+
+Its core implementation is a ordered multi-level linked list. Every node in the list has a randomized level and multiple forward pointers. The link on the most bottom level contains all elements, and link on higher level skips some elements to allow faster traversal.
+
+Interfaces of `skip_list`:
+
+Examples:
+
+```C++
+// TO BE COMPLETED
 ```
 
 ## Tests
